@@ -68,18 +68,33 @@ namespace Wesley.Crawler.StrongCrawler
                 {
                     var watch = DateTime.Now;
                     driver.Navigate().GoToUrl(uri.ToString());//请求URL地址
-                    if (script != null) driver.ExecuteScript(script.Code, script.Args);//执行Javascript代码
-                    if (operation.Action != null) operation.Action.Invoke(driver);
+                    if (script != null)
+                    {
+                        driver.ExecuteScript(script.Code, script.Args); //执行Javascript代码
+                    }
+                    if (operation.Action != null)
+                    {
+                        operation.Action.Invoke(driver);                        
+                    }
                     var driverWait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(operation.Timeout));//设置超时时间为x毫秒
-                    if (operation.Condition != null) driverWait.Until(operation.Condition);
+                    if (operation.Condition != null)
+                    {
+                        driverWait.Until(operation.Condition);                        
+                    }
                     var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;//获取当前任务线程ID
                     var milliseconds = DateTime.Now.Subtract(watch).Milliseconds;//获取请求执行时间;
                     var pageSource = driver.PageSource;//获取网页Dom结构
-                    this.OnCompleted?.Invoke(this, new OnCompletedEventArgs(uri, threadId, milliseconds, pageSource, driver));
+                    if (this.OnCompleted != null)
+                    {
+                        this.OnCompleted.Invoke(this, new OnCompletedEventArgs(uri, threadId, milliseconds, pageSource, driver));
+                    }                    
                 }
                 catch (Exception ex)
                 {
-                    this.OnError?.Invoke(this, new OnErrorEventArgs(uri, ex));
+                    if (this.OnError != null)
+                    {
+                        this.OnError.Invoke(this, new OnErrorEventArgs(uri, ex));
+                    }                    
                 }
                 finally
                 {
